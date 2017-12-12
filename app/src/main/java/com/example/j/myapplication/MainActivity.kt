@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         wifiManager.isWifiEnabled = true
         i("a", wifiManager.configuredNetworks.toString())
         i("b", wifiManager.connectionInfo.toString())
+        i("b", wifiManager.connectionInfo.toString())
 
         if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
