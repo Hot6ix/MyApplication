@@ -6,7 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.wifi.ScanResult
+import android.net.wifi.WifiConfiguration
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -31,10 +35,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        wifiManager.isWifiEnabled = true
-        i("a", wifiManager.configuredNetworks.toString())
-        i("b", wifiManager.connectionInfo.toString())
-        i("b", wifiManager.connectionInfo.toString())
 
         if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
@@ -48,10 +48,13 @@ class MainActivity : AppCompatActivity() {
                 when(p1?.action) {
                     WifiManager.SCAN_RESULTS_AVAILABLE_ACTION -> {
                         array = wifiManager.scanResults as ArrayList<ScanResult>
-                        var listAdapter: CustomListViewAdapter = CustomListViewAdapter(applicationContext, array)
-                        listView1.adapter = listAdapter
-                        size = array.size
 
+                        var filtered: ArrayList<ScanResult> = filter(array, wifiManager.configuredNetworks)
+                        textview1.setText("")
+                        for(i in sort(filtered)) {
+                            textview1.append("${i.SSID}, ${i.level}, ${i.frequency} \n")
+                        }
+                        compare(sort(filtered))
                     }
                     WifiManager.NETWORK_STATE_CHANGED_ACTION -> sendBroadcast(Intent("wifi.ON_NETWORK_STATE_CHANGED"))
                 }
@@ -64,72 +67,46 @@ class MainActivity : AppCompatActivity() {
 
         button1.setOnClickListener() {
             wifiManager.startScan()
-
-            size -= size
-            while(size >= 0) {
-                i("c", array.get(size).BSSID)
-            }
         }
     }
 
-    class CustomListViewAdapter(context: Context, array: List<Any>): BaseAdapter() {
-
-        private var mLayoutInflater: LayoutInflater
-        private var array: List<Any>
-        private var context: Context
-
-        init {
-            this.mLayoutInflater = LayoutInflater.from(context)
-            this.array = array
-            this.context = context
+    // Filtering that scanned wifi is configured
+    fun filter(scanned: ArrayList<ScanResult>, configured: List<WifiConfiguration>): ArrayList<ScanResult> {
+        var list: ArrayList<ScanResult> = ArrayList()
+        for(i in scanned) {
+            configured.filter { Regex("\"").replace(it.SSID, "") == i.SSID }.map { list.add(i) }
         }
 
-        override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-            var view: View
-            var v: ViewHolder
+        return list
+    }
 
-            if(p1 == null) {
-                view = this.mLayoutInflater.inflate(R.layout.listview_item, null)
-                v = ViewHolder(view)
-                view.tag = v
+    // Sorted by level
+    fun sort(scanned: ArrayList<ScanResult>): ArrayList<ScanResult> {
+        return ArrayList(scanned.sortedByDescending { it.level })
+    }
+
+    fun compare(filtered: List<ScanResult>) {
+        // Get connected wifi
+        var wifiInfo: WifiInfo = wifiManager.connectionInfo
+        var ssid: String = Regex("\"").replace(wifiInfo.ssid, "")
+
+        // Compare filteredList and connected wifi
+        //
+        for(i in filtered) {
+            if(ssid == i.SSID) {
+                i("a", "${i.SSID} is connected")
             }
             else {
-                view = p1
-                v = view.tag as ViewHolder
+                if (WifiManager.calculateSignalLevel(wifiInfo.rssi, 5) < i.level) {
+                    i("b", "${i.level} is stronger than ${wifiInfo.ssid}")
+                }
             }
-
-            if(p0 % 2 != 0) v.ssid.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_orange_light))
-            v.ssid.setText(array.get(p0).toString())
-//            v.ssid.setText("SSID : ${array.get(p0).SSID}, BSSID : ${array.get(p0).BSSID}, LEVEL : ${array.get(p0).level}, FREQUENCY : ${array.get(p0).frequency}, CAPABILITY : ${array.get(p0).capabilities}")
-            return view
-        }
-
-        override fun getItem(p0: Int): Any {
-            return array.get(p0)
-        }
-
-        override fun getItemId(p0: Int): Long {
-            return p0.toLong()
-        }
-
-        override fun getCount(): Int {
-            return array.size
         }
     }
 
-    public fun test(id: Int): String {
-        return id.toString()
-    }
+    fun check() {
+        if(wifiManager.connectionInfo.networkId == -1) {
 
-    class ViewHolder(view: View?) {
-        var ssid: TextView
-        var bssid: TextView
-        var frequency: TextView
-
-        init {
-            this.ssid = view?.findViewById<TextView>(R.id.ssid) as TextView
-            this.bssid = view?.findViewById<TextView>(R.id.bssid) as TextView
-            this.frequency = view?.findViewById<TextView>(R.id.frequency) as TextView
         }
     }
 
