@@ -112,4 +112,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when(requestCode) {
+            0 -> {
+                if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission was granted
+                    wifiManager.startScan()
+                }
+                else {
+                    // Permission denied
+                    i("Permission denied", "User denied the permission")
+                }
+            }
+        }
+    }
+
 }
