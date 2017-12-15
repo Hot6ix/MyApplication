@@ -6,23 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
+import android.net.wifi.WifiManager.*
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log.i
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,33 +39,33 @@ class MainActivity : AppCompatActivity() {
         val receiver = object: BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 when(p1?.action) {
-                    WifiManager.SCAN_RESULTS_AVAILABLE_ACTION -> {
+                    SCAN_RESULTS_AVAILABLE_ACTION -> {
                         array = wifiManager.scanResults as ArrayList<ScanResult>
 
-                        var filtered: ArrayList<ScanResult> = filter(array, wifiManager.configuredNetworks)
-                        textview1.setText("")
+                        val filtered: ArrayList<ScanResult> = filter(array, wifiManager.configuredNetworks)
+                        textview1.text = ""
                         for(i in sort(filtered)) {
                             textview1.append("${i.SSID}, ${i.level}, ${i.frequency} \n")
                         }
                         compare(sort(filtered))
                     }
-                    WifiManager.NETWORK_STATE_CHANGED_ACTION -> sendBroadcast(Intent("wifi.ON_NETWORK_STATE_CHANGED"))
+                    NETWORK_STATE_CHANGED_ACTION -> sendBroadcast(Intent("wifi.ON_NETWORK_STATE_CHANGED"))
                 }
             }
         }
 
-        var iFilter: IntentFilter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        iFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-        var registerReceiver = registerReceiver(receiver, iFilter)
+        val iFilter = IntentFilter(SCAN_RESULTS_AVAILABLE_ACTION)
+        iFilter.addAction(NETWORK_STATE_CHANGED_ACTION)
+        registerReceiver(receiver, iFilter)
 
-        button1.setOnClickListener() {
+        button1.setOnClickListener {
             wifiManager.startScan()
         }
     }
 
     // Filtering that scanned wifi is configured
     fun filter(scanned: ArrayList<ScanResult>, configured: List<WifiConfiguration>): ArrayList<ScanResult> {
-        var list: ArrayList<ScanResult> = ArrayList()
+        val list: ArrayList<ScanResult> = ArrayList()
         for(i in scanned) {
             configured.filter { Regex("\"").replace(it.SSID, "") == i.SSID }.map { list.add(i); array2.add(it) }
         }
@@ -87,8 +80,8 @@ class MainActivity : AppCompatActivity() {
 
     fun compare(filtered: List<ScanResult>) {
         // Get connected wifi
-        var wifiInfo: WifiInfo = wifiManager.connectionInfo
-        var ssid: String = Regex("\"").replace(wifiInfo.ssid, "") // Remove double quotes
+        val wifiInfo: WifiInfo = wifiManager.connectionInfo
+        val ssid: String = Regex("\"").replace(wifiInfo.ssid, "") // Remove double quotes
 
         // Compare filteredList and connected wifi
         //
