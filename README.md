@@ -1,6 +1,7 @@
 # SimpleWiFiChanger
 A simple application that scan wifi and connect better wifi automatically
-it was written in Kotlin
+
+It was written in Kotlin
 
 When you execute app, it requests permission for scan and change wifi.
 
