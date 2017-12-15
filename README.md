@@ -17,3 +17,5 @@ Steps
   - If connected wifi is better than others in list, do nothing
   - If anything in list is better than connected wifi, change to the better wifi
   - After change, it check that wifi is available and can connect to the internet
+
+Button is for re-scan and app prints list using textview
