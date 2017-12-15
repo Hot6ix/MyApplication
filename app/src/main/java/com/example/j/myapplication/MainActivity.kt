@@ -27,8 +27,8 @@ import org.w3c.dom.Text
 class MainActivity : AppCompatActivity() {
 
     lateinit var wifiManager: WifiManager
-    var size: Int = 0
     var array: ArrayList<ScanResult> = ArrayList<ScanResult>()
+    var array2: ArrayList<WifiConfiguration> = ArrayList<WifiConfiguration>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
     fun filter(scanned: ArrayList<ScanResult>, configured: List<WifiConfiguration>): ArrayList<ScanResult> {
         var list: ArrayList<ScanResult> = ArrayList()
         for(i in scanned) {
-            configured.filter { Regex("\"").replace(it.SSID, "") == i.SSID }.map { list.add(i) }
+            configured.filter { Regex("\"").replace(it.SSID, "") == i.SSID }.map { list.add(i); array2.add(it) }
         }
 
         return list
@@ -88,17 +88,19 @@ class MainActivity : AppCompatActivity() {
     fun compare(filtered: List<ScanResult>) {
         // Get connected wifi
         var wifiInfo: WifiInfo = wifiManager.connectionInfo
-        var ssid: String = Regex("\"").replace(wifiInfo.ssid, "")
+        var ssid: String = Regex("\"").replace(wifiInfo.ssid, "") // Remove double quotes
 
         // Compare filteredList and connected wifi
         //
-        for(i in filtered) {
-            if(ssid == i.SSID) {
-                i("a", "${i.SSID} is connected")
-            }
-            else {
-                if (WifiManager.calculateSignalLevel(wifiInfo.rssi, 5) < i.level) {
-                    i("b", "${i.level} is stronger than ${wifiInfo.ssid}")
+        for((i, item) in filtered.withIndex()) {
+            if(ssid != item.SSID) {
+                if (wifiInfo.rssi < item.level) {
+                    i("b", "${item.SSID}(${item.level}) is stronger than ${wifiInfo.ssid}(${wifiInfo.rssi})")
+                    var wifiConf: WifiConfiguration = array2[i]
+                    i("b", "${wifiConf.SSID} 's networkId : ${wifiConf.networkId}")
+                    wifiManager.disconnect()
+                    wifiManager.enableNetwork(wifiConf.networkId, true)
+                    wifiManager.reconnect()
                 }
             }
         }
