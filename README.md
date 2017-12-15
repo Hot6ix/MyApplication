@@ -1,5 +1,6 @@
-# MyApplication
-A simple application that scan wifi and connect better wifi automatically
+# SimpleWiFiChanger
+A simple application that scan wifi and connect better wifi automatically.
+It was written in Kotlin.
 
 When you execute app, it requests permission for scan and change wifi.
 
@@ -16,3 +17,5 @@ Steps
   - If connected wifi is better than others in list, do nothing
   - If anything in list is better than connected wifi, change to the better wifi
   - After change, it check that wifi is available and can connect to the internet
+
+Button is for re-scan and app prints list using textview
