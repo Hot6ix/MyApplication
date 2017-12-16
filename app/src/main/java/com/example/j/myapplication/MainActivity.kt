@@ -88,20 +88,24 @@ class MainActivity : AppCompatActivity() {
         for((i, item) in filtered.withIndex()) {
             if(ssid != item.SSID) {
                 if (wifiInfo.rssi < item.level) {
-                    i("b", "${item.SSID}(${item.level}) is stronger than ${wifiInfo.ssid}(${wifiInfo.rssi})")
                     var wifiConf: WifiConfiguration = array2[i]
-                    i("b", "${wifiConf.SSID} 's networkId : ${wifiConf.networkId}")
+                    
                     wifiManager.disconnect()
                     wifiManager.enableNetwork(wifiConf.networkId, true)
                     wifiManager.reconnect()
+
+                    if(check()) break
                 }
             }
         }
     }
 
-    fun check() {
-        if(wifiManager.connectionInfo.networkId == -1) {
-
+    fun check(): Boolean {
+        if(wifiManager.isWifiEnabled) {
+            return wifiManager.connectionInfo.networkId == -1
+        }
+        else {
+            return false
         }
     }
 
