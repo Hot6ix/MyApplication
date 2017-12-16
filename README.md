@@ -18,4 +18,4 @@ Steps
   - If anything in list is better than connected wifi, change to the better wifi
   - After change, check wifi is available
 
-Button is for re-scaning and app prints list(configured and sorted) using textview
+Button is for process the steps and prints list(filtered and sorted) using textview
