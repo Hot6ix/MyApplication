@@ -2,6 +2,8 @@
 A simple application that scan wifi and connect to better wifi automatically.
 Written in Kotlin.
 
+This application is just working on the activity not background like service
+
 When you execute app, it requests permission for scan and control wifi.
 
 Steps
